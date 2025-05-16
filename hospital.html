@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hospital Management System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #f4f8fb;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            flex-direction: column;
+            padding-top: 30px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 700px;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+
+        .container h2 {
+            color: #4A00E0;
+            margin-bottom: 20px;
+            font-size: 28px;
+            text-align: center;
+        }
+
+        .container input,
+        .container select,
+        .container textarea,
+        .container button {
+            width: 100%;
+            padding: 14px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            font-size: 16px;
+            box-sizing: border-box;
+            transition: border-color 0.3s ease;
+        }
+
+        .container input:focus,
+        .container select:focus,
+        .container textarea:focus {
+            outline: none;
+            border-color: #4facfe;
+        }
+
+        .container button {
+            background-color: #4facfe;
+            color: white;
+            border: none;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .container button:hover {
+            background-color: #38f9d7;
+        }
+
+        .list-container {
+            width: 100%;
+            max-width: 700px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            margin-top: 20px;
+        }
+
+        .list-container h3 {
+            color: #4A00E0;
+            margin-bottom: 15px;
+            font-size: 22px;
+        }
+
+        .list-item {
+            background: #f9f9f9;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            transition: all 0.3s ease;
+        }
+
+        .list-item:hover {
+            background-color: #f1f1f1;
+            transform: translateY(-2px);
+        }
+
+        .list-item button {
+            background: #ff4757;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .list-item button:hover {
+            background: #ff6b81;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Add Patient Section -->
+    <div class="container">
+        <h2>Add Patient</h2>
+        <form onsubmit="return false;">
+            <input type="text" id="patient-name" placeholder="Enter Patient Name" required>
+            <input type="number" id="patient-age" placeholder="Enter Age" required>
+            <textarea id="patient-history" placeholder="Enter Medical History" required></textarea>
+            <button type="button" onclick="submitPatient()">Submit</button>
+        </form>
+    </div>
+
+    <!-- Add Doctor Section -->
+    <div class="container">
+        <h2>Add Doctor</h2>
+        <form onsubmit="return false;">
+            <input type="text" id="doctor-name" placeholder="Enter Doctor's Name" required>
+            <input type="text" id="doctor-specialization" placeholder="Enter Specialization" required>
+            <button type="button" onclick="submitDoctor()">Submit</button>
+        </form>
+    </div>
+
+    <!-- Available Appointments Section -->
+    <div class="container">
+        <h2>Available Appointments</h2>
+        <form onsubmit="return false;">
+            <input type="text" id="appointment-doctor" placeholder="Enter Doctor's Name" required>
+            <input type="datetime-local" id="appointment-time" required>
+            <button type="button" onclick="submitAppointment()">Book Appointment</button>
+        </form>
+    </div>
+
+    <!-- Patient Billing Section -->
+    <div class="container">
+        <h2>Patient Billing</h2>
+        <form onsubmit="return false;">
+            <input type="text" id="bill-patient-name" placeholder="Enter Patient Name" required>
+            <input type="number" id="bill-amount" placeholder="Enter Bill Amount" required>
+            <button type="button" onclick="submitBill()">Generate Bill</button>
+        </form>
+    </div>
+
+    <!-- Lists Section -->
+    <div class="list-container" id="patient-list">
+        <h3>Patients List</h3>
+    </div>
+
+    <div class="list-container" id="doctor-list">
+        <h3>Doctors List</h3>
+    </div>
+
+    <div class="list-container" id="appointment-list">
+        <h3>Appointment List</h3>
+    </div>
+
+    <script>
+        let patients = [];
+        let doctors = [];
+        let appointments = [];
+        let bills = [];
+
+        // Function to submit a new patient
+        function submitPatient() {
+            const name = document.getElementById("patient-name").value;
+            const age = document.getElementById("patient-age").value;
+            const history = document.getElementById("patient-history").value;
+
+            if (!name || !age || !history) {
+                Swal.fire({ icon: 'error', title: 'Oops...', text: 'Please fill all the fields!' });
+                return;
+            }
+
+            const newPatient = { name, age, history };
+            patients.push(newPatient);
+
+            Swal.fire({ icon: 'success', title: 'Patient Added', text: `Patient ${name} added successfully!` })
+                .then(() => {
+                    document.querySelector("form").reset();
+                    displayPatients();
+                });
+        }
+
+        // Function to display patients
+        function displayPatients() {
+            const patientListDiv = document.getElementById('patient-list');
+            patientListDiv.innerHTML = patients.map((patient, index) => `
+                <div class="list-item">
+                    <div>${patient.name} (Age: ${patient.age})</div>
+                    <button onclick="confirmRemovePatient(${index})">Remove</button>
+                </div>
+            `).join('');
+        }
+
+        // Confirmation before removing a patient
+        function confirmRemovePatient(index) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, remove it!',
+                cancelButtonText: 'No, cancel!',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    removePatient(index);
+                }
+            });
+        }
+
+        // Function to remove a patient
+        function removePatient(index) {
+            patients.splice(index, 1);
+            displayPatients();
+            Swal.fire('Patient Removed', 'The patient has been removed successfully.', 'success');
+        }
+
+        // Function to submit a new doctor
+        function submitDoctor() {
+            const name = document.getElementById("doctor-name").value;
+            const specialization = document.getElementById("doctor-specialization").value;
+
+            if (!name || !specialization) {
+                Swal.fire({ icon: 'error', title: 'Oops...', text: 'Please fill all the fields!' });
+                return;
+            }
+
+            const newDoctor = { name, specialization };
+            doctors.push(newDoctor);
+
+            Swal.fire({ icon: 'success', title: 'Doctor Added', text: `Doctor ${name} added successfully!` })
+                .then(() => {
+                    document.querySelector("form").reset();
+                    displayDoctors();
+                });
+        }
+
+        // Function to display doctors
+        function displayDoctors() {
+            const doctorListDiv = document.getElementById('doctor-list');
+            doctorListDiv.innerHTML = doctors.map((doctor, index) => `
+                <div class="list-item">
+                    <div>${doctor.name} (${doctor.specialization})</div>
+                    <button onclick="confirmRemoveDoctor(${index})">Remove</button>
+                </div>
+            `).join('');
+        }
+
+        // Confirmation before removing a doctor
+        function confirmRemoveDoctor(index) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, remove it!',
+                cancelButtonText: 'No, cancel!',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    removeDoctor(index);
+                }
+            });
+        }
+
+        // Function to remove a doctor
+        function removeDoctor(index) {
+            doctors.splice(index, 1);
+            displayDoctors();
+            Swal.fire('Doctor Removed', 'The doctor has been removed successfully.', 'success');
+        }
+
+        // Function to submit an appointment
+        function submitAppointment() {
+            const doctorName = document.getElementById("appointment-doctor").value;
+            const appointmentTime = document.getElementById("appointment-time").value;
+
+            if (!doctorName || !appointmentTime) {
+                Swal.fire({ icon: 'error', title: 'Oops...', text: 'Please fill all the fields!' });
+                return;
+            }
+
+            const newAppointment = { doctorName, appointmentTime };
+            appointments.push(newAppointment);
+
+            Swal.fire({ icon: 'success', title: 'Appointment Booked', text: `Appointment with Dr. ${doctorName} booked successfully!` })
+                .then(() => {
+                    document.querySelector("form").reset();
+                    displayAppointments();
+                });
+        }
+
+        // Function to display appointments
+        function displayAppointments() {
+            const appointmentListDiv = document.getElementById('appointment-list');
+            appointmentListDiv.innerHTML = appointments.map((appointment, index) => `
+                <div class="list-item">
+                    <div>Dr. ${appointment.doctorName} - ${appointment.appointmentTime}</div>
+                    <button onclick="confirmRemoveAppointment(${index})">Remove</button>
+                </div>
+            `).join('');
+        }
+
+        // Confirmation before removing an appointment
+        function confirmRemoveAppointment(index) {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You won't be able to revert this!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, remove it!',
+                cancelButtonText: 'No, cancel!',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    removeAppointment(index);
+                }
+            });
+        }
+
+        // Function to remove an appointment
+        function removeAppointment(index) {
+            appointments.splice(index, 1);
+            displayAppointments();
+            Swal.fire('Appointment Removed', 'The appointment has been removed successfully.', 'success');
+        }
+
+        // Function to submit a bill
+        function submitBill() {
+            const patientName = document.getElementById("bill-patient-name").value;
+            const amount = document.getElementById("bill-amount").value;
+
+            if (!patientName || !amount) {
+                Swal.fire({ icon: 'error', title: 'Oops...', text: 'Please fill all the fields!' });
+                return;
+            }
+
+            const newBill = { patientName, amount };
+            bills.push(newBill);
+
+            Swal.fire({ icon: 'success', title: 'Bill Generated', text: `Bill for ${patientName} generated successfully!` })
+                .then(() => {
+                    document.querySelector("form").reset();
+                    displayBills();
+                });
+        }
+
+        // Function to display bills
+        function displayBills() {
+            const billListDiv = document.getElementById('bill-list');
+            billListDiv.innerHTML = bills.map((bill) => `
+                <div class="list-item">
+                    <div>${bill.patientName} - $${bill.amount}</div>
+                </div>
+            `).join('');
+        }
+
+        // Initial display of lists
+        displayPatients();
+        displayDoctors();
+        displayAppointments();
+        displayBills();
+    </script>
+
+</body>
+</html>
